@@ -1,0 +1,354 @@
+﻿@model ProjectIdentityEmail.Dtos.CreateUserRegisterDto
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Yeni Kayıt - Pastel Panel</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-body: #f0f4ff;
+            --primary-soft: #8e94f2; /* Pastel Mor */
+            --primary-dark: #6c72e2;
+            --text-dark: #2d3748;
+            --text-muted: #a0aec0;
+            --input-bg: #f8fafc;
+            --input-border: #e2e8f0;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+
+        /* Arka Plan Süslemesi */
+        .bg-shape {
+            position: absolute;
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(142,148,242,0.1) 0%, rgba(240,244,255,0) 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: -1;
+        }
+
+        /* Kayıt Kartı */
+        .register-card {
+            background: #ffffff;
+            padding: 45px 40px;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(142, 148, 242, 0.1);
+            width: 100%;
+            max-width: 550px; /* Login'den biraz daha geniş */
+            border: 1px solid #fff;
+        }
+
+        /* Logo Alanı */
+        .logo-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary-soft);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+        }
+
+        .logo-text {
+            font-family: 'Poppins', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        /* Form Elemanları */
+        .form-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #4a5568;
+            margin-bottom: 6px;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            background-color: var(--input-bg);
+            border: 2px solid var(--input-border);
+            border-radius: 12px;
+            height: 48px;
+            padding-left: 15px;
+            font-size: 14px;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+        }
+
+            .form-control:focus {
+                background-color: #fff;
+                border-color: var(--primary-soft);
+                box-shadow: 0 0 0 4px rgba(142, 148, 242, 0.1);
+                color: var(--text-dark);
+            }
+
+        /* Checkbox ve Sözleşme Linki */
+        .agreement-check {
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 25px;
+            text-align: left;
+            margin-top: 10px;
+        }
+
+        .form-check-input {
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
+            border-color: var(--input-border);
+            cursor: pointer;
+        }
+
+            .form-check-input:checked {
+                background-color: var(--primary-soft);
+                border-color: var(--primary-soft);
+            }
+
+        .agreement-link {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+            .agreement-link:hover {
+                text-decoration: underline;
+                color: var(--primary-soft);
+            }
+
+        /* Butonlar */
+        .btn-register-submit {
+            background-color: var(--primary-soft);
+            color: white;
+            border: none;
+            width: 100%;
+            height: 50px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            box-shadow: 0 10px 20px rgba(142, 148, 242, 0.25);
+            transition: all 0.3s;
+        }
+
+            .btn-register-submit:hover {
+                background-color: var(--primary-dark);
+                transform: translateY(-2px);
+                box-shadow: 0 15px 30px rgba(142, 148, 242, 0.35);
+                color: white;
+            }
+
+        .login-link {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+            .login-link:hover {
+                text-decoration: underline;
+            }
+
+        /* --- MODAL TASARIMI (PASTEL) --- */
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid #f0f4ff;
+            padding: 25px;
+        }
+
+        .modal-title {
+            color: var(--primary-dark);
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .modal-body {
+            padding: 25px;
+            color: #4a5568;
+            font-size: 14px;
+        }
+
+        .modal-footer {
+            border-top: none;
+            padding: 20px 25px;
+        }
+
+        .btn-close-modal {
+            background-color: #edf2f7;
+            color: #4a5568;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+            .btn-close-modal:hover {
+                background-color: #e2e8f0;
+            }
+
+    </style>
+</head>
+<body>
+
+    <div class="bg-shape"></div>
+
+    <div class="register-card">
+
+        <div class="logo-area">
+            <div class="logo-icon"><i class="fas fa-user-plus"></i></div>
+            <span class="logo-text">Yeni Hesap</span>
+        </div>
+
+        <form method="post" asp-action="CreateUser">
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">ADINIZ</label>
+                    <input type="text" asp-for="Name" class="form-control" placeholder="Adınız" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">SOYADINIZ</label>
+                    <input type="text" asp-for="SurName" class="form-control" placeholder="Soyadınız" />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">KULLANICI ADI</label>
+                <input type="text" asp-for="UserName" class="form-control" placeholder="kullaniciadi" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">EMAIL ADRESİ</label>
+                <input type="email" asp-for="Email" class="form-control" placeholder="ornek@email.com" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">ŞİFRE</label>
+                <input type="password" asp-for="Password" class="form-control" placeholder="••••••••" />
+            </div>
+
+            <div class="agreement-check">
+                <input class="form-check-input" type="checkbox" id="flexCheckDefault" required>
+                <label class="form-check-label" for="flexCheckDefault">
+                    <span class="agreement-link" data-bs-toggle="modal" data-bs-target="#agreementModal">Kullanıcı Sözleşmesini</span> okudum ve onaylıyorum.
+                </label>
+            </div>
+
+            <div class="text-danger mb-3 small" asp-validation-summary="ModelOnly"></div>
+
+            <button type="submit" class="btn btn-register-submit">KAYIT OL VE DOĞRULA</button>
+        </form>
+
+        <div class="text-center mt-4 small text-muted">
+            Zaten hesabınız var mı? <a href="/Login/UserLogin" class="login-link">Giriş Yap</a>
+        </div>
+    </div>
+
+    <div class="modal fade" id="verifyModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-envelope-open-text me-2"></i>Mail Doğrulama</h5>
+                </div>
+                <div class="modal-body text-center">
+                    <p class="mb-3">Lütfen <strong>@Model?.Email</strong> adresine gönderilen 6 haneli kodu giriniz.</p>
+
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger">@ViewBag.Error</div>
+                    }
+
+                    <form method="post" asp-action="ConfirmMailCode">
+                        <div class="form-group mb-4">
+                            <input type="number" name="InputCode" class="form-control text-center fs-4" placeholder="######" required style="letter-spacing: 5px;" />
+                        </div>
+                        <button type="submit" class="btn btn-register-submit">
+                            Kodu Doğrula <i class="fas fa-check ms-1"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="agreementModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Kullanıcı Sözleşmesi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>1. TARAFLAR</strong></p>
+                    <p>İşbu sözleşme PastelMail platformu ile kullanıcı arasında yapılmıştır.</p>
+                    <p><strong>2. KULLANIM KOŞULLARI</strong></p>
+                    <p>Bu platformu kullanarak aşağıdaki şartları kabul etmiş sayılırsınız:</p>
+                    <ul>
+                        <li>Sistem güvenliğini tehdit edici davranışlarda bulunmamak.</li>
+                        <li>Spam veya zararlı içerik göndermemek.</li>
+                    </ul>
+                    <p><strong>3. GİZLİLİK</strong></p>
+                    <p>Kişisel verileriniz KVKK kapsamında korunmaktadır.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-close-modal" data-bs-dismiss="modal">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Eğer Controller'dan "ShowModal" true gelirse, Mail Doğrulama Modalını aç
+        @if (ViewBag.ShowModal == true)
+        {
+            <text>
+                        var myModal = new bootstrap.Modal(document.getElementById('verifyModal'));
+                        myModal.show();
+            </text>
+        }
+    </script>
+
+</body>
+</html>

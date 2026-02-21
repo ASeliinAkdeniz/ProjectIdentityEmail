@@ -1,0 +1,384 @@
+﻿@model List<ProjectIdentityEmail.Entities.Message>
+@{
+    ViewData["Title"] = "Giden Kutusu";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* --- PASTEL TEMA AYARLARI --- */
+    :root {
+        --primary-soft: #8e94f2;
+        --primary-dark: #6c72e2;
+        --text-dark: #2d3748;
+        --text-muted: #a0aec0;
+        --bg-card: #ffffff;
+        --bg-body: #f3f4f8;
+        --border-color: #f1f5f9;
+        --hover-row: #f8fafc;
+        --gold-star: #fbbf24;
+    }
+
+    .sendbox-card {
+        background-color: var(--bg-card);
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+        padding: 0;
+        overflow: hidden;
+        min-height: 80vh;
+    }
+
+    .table-responsive {
+        width: 100%;
+        border-radius: 20px;
+    }
+
+    .table-custom {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 0;
+    }
+
+        .table-custom thead th {
+            background-color: #f8fafc;
+            color: var(--text-muted);
+            font-weight: 700;
+            padding: 20px 25px;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--border-color);
+            border-top: none;
+        }
+
+        .table-custom tbody tr {
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.2s ease-in-out;
+        }
+
+            .table-custom tbody tr:hover {
+                background-color: var(--hover-row);
+                cursor: pointer;
+            }
+
+            .table-custom tbody tr td {
+                padding: 18px 25px;
+                vertical-align: middle;
+                border: none;
+                color: var(--text-dark);
+            }
+
+    .subject-title {
+        color: var(--text-dark);
+        font-weight: 700;
+        font-size: 1rem;
+        display: block;
+    }
+
+    .receiver-text {
+        color: var(--text-dark);
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .message-preview {
+        font-size: 0.85rem;
+        color: #a0aec0;
+        display: block;
+        margin-top: 4px;
+    }
+
+    .mail-icon-box {
+        width: 40px;
+        height: 40px;
+        background: rgba(142, 148, 242, 0.15);
+        color: var(--primary-soft);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        margin: 0 auto;
+    }
+
+    .star-btn {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+        transition: transform 0.2s;
+    }
+
+        .star-btn:hover {
+            transform: scale(1.2);
+        }
+
+    .star-icon {
+        color: #cbd5e0;
+        font-size: 1.2rem;
+        transition: 0.2s;
+    }
+
+        .star-icon.active {
+            color: var(--gold-star) !important;
+        }
+
+    .btn-action {
+        width: 35px;
+        height: 35px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #e2e8f0;
+        color: #a0aec0;
+        background: white;
+        transition: 0.2s;
+    }
+
+        .btn-action:hover {
+            background: var(--primary-soft);
+            color: white;
+            border-color: var(--primary-soft);
+            box-shadow: 0 4px 10px rgba(142, 148, 242, 0.3);
+        }
+
+    .modal-content-pastel {
+        background-color: #fff;
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+    }
+
+    .modal-header, .modal-footer {
+        border-color: #f1f5f9;
+        padding: 20px 30px;
+    }
+
+    .modal-title {
+        color: var(--text-dark);
+        font-weight: 700;
+    }
+
+    .modal-receiver-badge {
+        background: #f7fafc;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        color: var(--primary-dark);
+        font-weight: 500;
+    }
+</style>
+
+<div class="container-fluid p-0">
+    <div class="sendbox-card">
+
+        <div class="d-flex justify-content-between align-items-center p-4 border-bottom" style="border-color: var(--border-color) !important;">
+            <div class="d-flex align-items-center">
+                <div style="background-color: var(--primary-soft); padding: 12px; border-radius: 12px; margin-right: 15px; color:white;">
+                    <i class="fas fa-paper-plane fa-lg"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold mb-0" style="color:var(--text-dark);">Giden Kutusu</h4>
+                    <small class="text-muted">Gönderdiğiniz iletiler listesi</small>
+                </div>
+            </div>
+            <a href="/Message/SendMessage" class="btn text-white px-4 py-2 rounded-3 shadow-sm fw-bold" style="background-color: var(--primary-soft); border:none;">
+                <i class="fas fa-pen me-2"></i>Yeni Mesaj
+            </a>
+        </div>
+
+        <div class="card-body p-0">
+            @if (Model.Count > 0)
+            {
+                <div class="table-responsive">
+                    <table class="table table-custom">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;" class="text-center"><i class="fas fa-star text-warning"></i></th>
+                                <th style="width: 60px;" class="text-center">#</th>
+                                <th style="width: 45%;">KONU VE İÇERİK</th>
+                                <th style="width: 25%;">ALICI</th>
+                                <th>TARİH</th>
+                                <th class="text-end pe-5">İŞLEMLER</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                string plainText = System.Text.RegularExpressions.Regex.Replace(item.MessageDetail ?? "", "<.*?>", String.Empty);
+                                string previewText = plainText.Length > 60 ? plainText.Substring(0, 60) + "..." : plainText;
+
+                                <tr>
+                                    <td class="text-center">
+                                        <button class="star-btn" onclick="toggleStar(this, @item.MessageId)">
+                                            <i class="fas fa-star star-icon @(item.IsStarred ? "active" : "")"></i>
+                                        </button>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <div class="mail-icon-box">
+                                            <i class="fas fa-envelope"></i>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <span class="subject-title">
+                                                @item.Subject
+                                                @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                                {
+                                                    <i class="fas fa-paperclip ms-2 text-warning" style="font-size: 0.9rem;" title="Ekli Dosya"></i>
+                                                }
+                                            </span>
+                                            <span class="message-preview">
+                                                @previewText
+                                            </span>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <span class="receiver-text">@item.ReceiverEmail</span>
+                                    </td>
+
+                                    <td style="color: #a0aec0; font-size: 0.85rem; font-weight:500;">
+                                        @item.SendDate.ToString("dd MMM yyyy, HH:mm")
+                                    </td>
+
+                                    <td class="text-end pe-5">
+                                        <div id="hidden-content-@item.MessageId" class="d-none">
+                                            @Html.Raw(item.MessageDetail)
+                                        </div>
+
+                                        <button type="button" class="btn-action view-btn me-2"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#messageModal"
+                                                data-id="@item.MessageId"
+                                                data-subject="@item.Subject"
+                                                data-receiver="@item.ReceiverEmail"
+                                                data-date="@item.SendDate.ToString("dd MMMM yyyy HH:mm")"
+                                                data-image="@item.ImageUrl">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+
+                                        <a href="/Message/DeleteSendboxMessage/@item.MessageId" class="btn-action text-decoration-none">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5 mt-5">
+                    <div style="background:#f8fafc; width:100px; height:100px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin: 0 auto 20px auto;">
+                        <i class="fas fa-paper-plane fa-3x text-muted opacity-50"></i>
+                    </div>
+                    <h5 class="fw-bold" style="color:var(--text-dark)">Giden kutusu boş.</h5>
+                    <p class="text-muted">Henüz hiç mesaj göndermediniz.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="messageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content modal-content-pastel">
+            <div class="modal-header">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-light border dropdown-toggle fw-bold text-muted" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-folder-plus me-1"></i> Başlıklar
+                        </button>
+                        <ul class="dropdown-menu shadow border-0">
+                            <li><a class="dropdown-item" id="btnSetWork" href="#"><i class="fas fa-briefcase text-primary me-2"></i>İş</a></li>
+                            <li><a class="dropdown-item" id="btnSetFamily" href="#"><i class="fas fa-home text-warning me-2"></i>Aile</a></li>
+                            <li><a class="dropdown-item" id="btnSetFriend" href="#"><i class="fas fa-user-friends text-success me-2"></i>Arkadaşlar</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="d-flex justify-content-between align-items-start mb-4">
+                    <div>
+                        <h4 class="fw-bold mb-2" id="modalSubject" style="color:var(--text-dark)">...</h4>
+                        <span class="modal-receiver-badge">
+                            <i class="fas fa-user me-2"></i> Alıcı: <span id="modalReceiver">...</span>
+                        </span>
+                    </div>
+                    <span class="badge bg-light text-muted border px-3 py-2" id="modalDate">...</span>
+                </div>
+
+                <div style="background: #f8fafc; padding: 25px; border-radius: 15px; color: #4a5568; line-height: 1.6;" id="modalContent"></div>
+
+                <div id="modalImageBox" class="d-none mt-3">
+                    <span class="small fw-bold text-muted d-block mb-2">EKLİ GÖRSEL</span>
+                    <img src="" id="modalImage" class="img-fluid rounded-3 border shadow-sm" style="max-height: 300px;">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light fw-bold text-muted" data-bs-dismiss="modal">Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- YILDIZ TIKLAMA FONKSİYONU ---
+    function toggleStar(btn, id) {
+        var icon = btn.querySelector('i');
+        if (icon.classList.contains('active')) {
+            icon.classList.remove('active');
+            icon.style.color = "#cbd5e0";
+        } else {
+            icon.classList.add('active');
+            icon.style.color = "#fbbf24";
+        }
+        fetch('/Message/ToggleStar/' + id);
+    }
+
+    // --- MODAL İÇERİĞİ VE KLASÖR LİNKLERİ DOLDURMA ---
+    document.addEventListener("DOMContentLoaded", function() {
+        var messageModal = document.getElementById('messageModal');
+
+        messageModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var messageId = button.getAttribute('data-id');
+
+            // 1. Metin ve Tarih Bilgilerini Doldur
+            document.getElementById('modalSubject').textContent = button.getAttribute('data-subject');
+            document.getElementById('modalReceiver').textContent = button.getAttribute('data-receiver');
+            document.getElementById('modalDate').textContent = button.getAttribute('data-date');
+
+            // DİKKAT: İçeriği artık gizli div'den güvenli bir şekilde çekiyoruz
+            var hiddenContent = document.getElementById('hidden-content-' + messageId);
+            if(hiddenContent) {
+                document.getElementById('modalContent').innerHTML = hiddenContent.innerHTML;
+            }
+
+            // 2. Klasör Atama Butonlarının Linklerini Güncelle
+            document.getElementById('btnSetWork').href = "/Message/AssignFolder?id=" + messageId + "&folder=Is";
+            document.getElementById('btnSetFamily').href = "/Message/AssignFolder?id=" + messageId + "&folder=Aile";
+            document.getElementById('btnSetFriend').href = "/Message/AssignFolder?id=" + messageId + "&folder=Arkadaslar";
+
+            // 3. Görsel Varsa Göster Yoksa Gizle
+            var image = button.getAttribute('data-image');
+            var imgBox = document.getElementById('modalImageBox');
+            var imgEl = document.getElementById('modalImage');
+
+            if (image && image.trim() !== '') {
+                imgEl.src = image;
+                imgBox.classList.remove('d-none');
+            } else {
+                imgBox.classList.add('d-none');
+                imgEl.src = ''; // Önceki görseli temizle
+            }
+        });
+    });
+</script>

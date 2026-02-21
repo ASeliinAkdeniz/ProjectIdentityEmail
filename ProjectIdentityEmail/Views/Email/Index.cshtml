@@ -1,0 +1,133 @@
+﻿@model ProjectIdentityEmail.Dtos.MailRequestDto
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mendy Admin - Yeni Mesaj</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f7fb;
+            font-family: 'Inter', sans-serif;
+            color: #495057;
+        }
+        .main-wrapper {
+            padding: 50px 0;
+        }
+        .mail-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            background: #fff;
+        }
+        .card-header {
+            background: transparent;
+            border-bottom: 1px solid #f0f0f0;
+            padding: 20px 30px;
+        }
+        .card-header h4 {
+            font-weight: 600;
+            margin: 0;
+            color: #333;
+        }
+        .form-label {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 8px;
+        }
+        .form-control {
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+            padding: 12px 15px;
+            transition: all 0.3s;
+        }
+        .form-control:focus {
+            border-color: #ff00cc;
+            box-shadow: 0 0 0 0.2rem rgba(255, 0, 204, 0.1);
+        }
+        .btn-send {
+            background: linear-gradient(45deg, #ff00cc, #3333ff);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            float: right;
+            transition: transform 0.2s;
+        }
+        .btn-send:hover {
+            transform: translateY(-2px);
+            color: #fff;
+            opacity: 0.9;
+        }
+        /* Görseldeki Sidebar Rengi */
+        .sidebar-mock {
+            background-color: #2b2b4b;
+            border-radius: 15px;
+            height: 100%;
+            padding: 20px;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container main-wrapper">
+        <div class="row">
+            <div class="col-md-3 d-none d-md-block">
+                <div class="sidebar-mock">
+                    <div class="mb-4">
+                        <h5 class="text-white">Mendy</h5>
+                    </div>
+                    <div class="list-group list-group-flush bg-transparent">
+                        <a href="#" class="list-group-item list-group-item-action bg-transparent text-white border-0 opacity-75">Dashboard</a>
+                        <a href="#" class="list-group-item list-group-item-action bg-transparent text-white border-0 fw-bold">Mail Gönder</a>
+                        <a href="#" class="list-group-item list-group-item-action bg-transparent text-white border-0 opacity-75">Gelen Kutusu</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-9">
+                <div class="card mail-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4>Yeni Mesaj Oluştur</h4>
+                        <span class="badge bg-light text-dark">Taslak olarak kaydet</span>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="post">
+                            <div class="mb-4">
+                                <label class="form-label">Alıcı E-posta Adresi</label>
+                                <input type="email" asp-for="ReceiverEmail" class="form-control" placeholder="Örn: ornek@mail.com" required />
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Konu</label>
+                                <input type="text" asp-for="Subject" class="form-control" placeholder="Mail konusunu buraya yazın..." />
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Mesaj Detayı</label>
+                                <textarea asp-for="MessageDetail" class="form-control" rows="8" placeholder="Mesajınızı buraya yazın..."></textarea>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <button type="button" class="btn btn-link text-muted text-decoration-none">Dosya Ekle</button>
+                                <button type="submit" class="btn btn-send">Mail Gönder</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

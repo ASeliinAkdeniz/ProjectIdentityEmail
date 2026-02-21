@@ -1,0 +1,304 @@
+﻿@model List<ProjectIdentityEmail.Entities.Message>
+@{
+    ViewData["Title"] = "Çöp Kutusu";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* --- PASTEL TEMA AYARLARI --- */
+    :root {
+        --primary-soft: #8e94f2;
+        --danger-soft: #f87171;
+        --danger-bg: #fee2e2;
+        --text-dark: #2d3748;
+        --text-muted: #a0aec0;
+        --bg-card: #ffffff;
+        --bg-body: #f3f4f8;
+        --border-color: #f1f5f9;
+        --hover-row: #fff1f2; /* Hover olunca hafif kırmızımsı */
+    }
+
+    /* Kapsayıcı Kart */
+    .trash-card {
+        background-color: var(--bg-card);
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+        padding: 0;
+        overflow: hidden;
+        min-height: 80vh;
+    }
+
+    /* --- TABLO TASARIMI --- */
+    .table-responsive {
+        width: 100%;
+        border-radius: 20px;
+    }
+
+    .table-custom {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 0;
+    }
+
+        /* Başlıklar */
+        .table-custom thead th {
+            background-color: #f8fafc;
+            color: var(--text-muted);
+            font-weight: 700;
+            padding: 20px 25px;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--border-color);
+            border-top: none;
+        }
+
+        /* Satırlar */
+        .table-custom tbody tr {
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.2s ease-in-out;
+        }
+
+            .table-custom tbody tr:hover {
+                background-color: var(--hover-row);
+            }
+
+            .table-custom tbody tr td {
+                padding: 18px 25px;
+                vertical-align: middle;
+                border: none;
+                color: var(--text-dark);
+            }
+
+    /* --- İÇERİK STİLLERİ --- */
+    .subject-title {
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--text-dark);
+        display: block;
+    }
+
+    .person-text {
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    /* Çöp İkonu */
+    .trash-icon-box {
+        width: 40px;
+        height: 40px;
+        background: var(--danger-bg);
+        color: var(--danger-soft);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        margin: 0 auto;
+    }
+
+    /* Badge (Gelen/Giden) */
+    .badge-type {
+        font-size: 0.7rem;
+        padding: 5px 12px;
+        border-radius: 6px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+
+    .badge-incoming {
+        background-color: #def7ec;
+        color: #03543f;
+    }
+
+    .badge-outgoing {
+        background-color: #e1effe;
+        color: #1e429f;
+    }
+
+    /* BUTONLAR */
+    /* Geri Yükle Butonu */
+    .btn-restore {
+        width: 35px;
+        height: 35px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #e2e8f0;
+        color: #3b82f6;
+        background: white;
+        transition: 0.2s;
+    }
+
+        .btn-restore:hover {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+        }
+
+    /* Kalıcı Sil Butonu */
+    .btn-delete-forever {
+        width: 35px;
+        height: 35px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #e2e8f0;
+        color: var(--danger-soft);
+        background: white;
+        transition: 0.2s;
+    }
+
+        .btn-delete-forever:hover {
+            background: var(--danger-soft);
+            color: white;
+            border-color: var(--danger-soft);
+            box-shadow: 0 4px 10px rgba(248, 113, 113, 0.3);
+        }
+
+    /* Modal */
+    .modal-content-pastel {
+        background-color: #fff;
+        border-radius: 20px;
+        border: none;
+    }
+</style>
+
+<div class="container-fluid p-0">
+    <div class="trash-card">
+
+        <div class="d-flex justify-content-between align-items-center p-4 border-bottom" style="border-color: var(--border-color) !important;">
+            <div class="d-flex align-items-center">
+                <div style="background: linear-gradient(135deg, #f87171, #ef4444); padding: 12px; border-radius: 12px; margin-right: 15px; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);">
+                    <i class="fas fa-trash-alt text-white fa-lg"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold mb-0" style="color:var(--text-dark);">Çöp Kutusu</h4>
+                    <small class="text-muted">Silinen mailler burada saklanır</small>
+                </div>
+            </div>
+
+            @if (Model.Count > 0)
+            {
+                <button class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold border-2">
+                    <i class="fas fa-ban me-1"></i> Kutuyu Boşalt
+                </button>
+            }
+        </div>
+
+        <div class="card-body p-0">
+            @if (Model.Count > 0)
+            {
+                <div class="table-responsive">
+                    <table class="table table-custom">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;" class="text-center">#</th>
+                                <th style="width: 100px;">TÜR</th>
+                                <th style="width: 25%;">KİŞİ</th>
+                                <th style="width: 40%;">KONU</th>
+                                <th>TARİH</th>
+                                <th class="text-end pe-5">İŞLEMLER</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                bool isIncoming = item.ReceiverEmail == User.Identity.Name || item.SenderEmail != User.Identity.Name;
+                                string typeBadge = isIncoming ? "GELEN" : "GİDEN";
+                                string badgeClass = isIncoming ? "badge-incoming" : "badge-outgoing";
+                                string person = isIncoming ? item.SenderEmail : item.ReceiverEmail;
+
+                                // HATA VEREN KISIM İÇİN DÜZELTME
+                                string plainText = System.Text.RegularExpressions.Regex.Replace(item.MessageDetail ?? "", "<.*?>", String.Empty);
+                                string previewText = plainText.Length > 50 ? plainText.Substring(0, 50) + "..." : plainText;
+
+                                <tr>
+                                    <td class="text-center">
+                                        <div class="trash-icon-box">
+                                            <i class="fas fa-recycle"></i>
+                                        </div>
+                                    </td>
+
+                                    <td><span class="badge @badgeClass badge-type">@typeBadge</span></td>
+
+                                    <td><span class="person-text">@person</span></td>
+
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <span class="subject-title">@item.Subject</span>
+                                            <span class="small text-muted">
+                                                @previewText
+                                            </span>
+                                        </div>
+                                    </td>
+
+                                    <td style="color: #a0aec0; font-size: 0.85rem; font-weight:500;">
+                                        @item.SendDate.ToString("dd MMM, HH:mm")
+                                    </td>
+
+                                    <td class="text-end pe-5">
+                                        <a href="/Message/RestoreMessage/@item.MessageId" class="btn-restore me-2" title="Geri Yükle">
+                                            <i class="fas fa-undo"></i>
+                                        </a>
+
+                                        <button type="button" class="btn-delete-forever" title="Kalıcı Olarak Sil"
+                                                data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                                data-id="@item.MessageId">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5 mt-5">
+                    <div style="background:#fee2e2; width:100px; height:100px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin: 0 auto 20px auto;">
+                        <i class="fas fa-trash fa-3x text-danger opacity-50"></i>
+                    </div>
+                    <h5 class="fw-bold" style="color:var(--text-dark)">Çöp kutusu boş.</h5>
+                    <p class="text-muted">Geri dönüşüm kutunuz tertemiz!</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-content-pastel p-3 text-center">
+            <div class="modal-body">
+                <div class="mb-3">
+                    <i class="fas fa-exclamation-circle fa-3x text-danger"></i>
+                </div>
+                <h5 class="fw-bold text-dark">Emin misiniz?</h5>
+                <p class="text-muted mb-4">Bu mail kalıcı olarak silinecek ve geri getirilemeyecek.</p>
+
+                <div class="d-flex justify-content-center gap-2">
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Vazgeç</button>
+                    <a href="#" id="btnConfirmDelete" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm">Evet, Sil</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Silme butonuna ID aktarma scripti
+    var deleteModal = document.getElementById('deleteModal');
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var messageId = button.getAttribute('data-id');
+        var confirmBtn = document.getElementById('btnConfirmDelete');
+        confirmBtn.href = "/Message/DeleteFinal/" + messageId;
+    });
+</script>

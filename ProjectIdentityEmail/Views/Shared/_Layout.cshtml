@@ -1,0 +1,473 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using ProjectIdentityEmail.Entities
+@using ProjectIdentityEmail.Context
+@inject UserManager<AppUser> UserManager
+@inject EmailContext _context
+
+@{
+    AppUser user = null;
+    int totalUnreadCount = 0;
+    List<Message> unreadMessages = new List<Message>();
+
+    if (User.Identity.IsAuthenticated)
+    {
+        user = await UserManager.FindByNameAsync(User.Identity.Name);
+        if (user != null)
+        {
+            totalUnreadCount = _context.Messages.Count(x => x.ReceiverEmail == user.Email && x.IsStatus == false && x.IsTrash == false);
+            unreadMessages = _context.Messages
+                .Where(x => x.ReceiverEmail == user.Email && x.IsStatus == false && x.IsTrash == false)
+                .OrderByDescending(x => x.SendDate)
+                .Take(5)
+                .ToList();
+        }
+    }
+
+    var userImage = string.IsNullOrEmpty(user?.ImageUrl) ? "/images/default-user.png" : "/images/" + user.ImageUrl;
+    var fullName = user != null ? $"{user.Name} {user.SurName}" : "Misafir Kullanıcı";
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Pastel Mail</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-body: #f3f4f8;
+            --bg-sidebar: #ffffff;
+            --primary-soft: #8e94f2;
+            --primary-dark: #6c72e2;
+            --text-dark: #2d3748;
+            --text-muted: #a0aec0;
+            --badge-inbox: #e2e8f0;
+            --badge-text: #4a5568;
+            --hover-bg: #f7fafc;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 260px;
+            background: var(--bg-sidebar);
+            height: 100vh;
+            position: fixed;
+            border-right: 1px solid #eef1f6;
+            z-index: 1000;
+            overflow-y: auto;
+            padding-top: 20px;
+        }
+
+        .logo-area {
+            padding: 0 30px 30px 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-text {
+            font-family: 'Poppins', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-dark);
+            letter-spacing: -0.5px;
+        }
+
+        /* Yeni Mesaj Butonu */
+        .btn-compose {
+            background-color: var(--primary-soft);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            margin: 0 25px 30px 25px;
+            width: calc(100% - 50px);
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(142, 148, 242, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+            .btn-compose:hover {
+                background-color: var(--primary-dark);
+                transform: translateY(-2px);
+                color: white;
+            }
+
+        /* Menü Başlıkları */
+        .menu-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            font-weight: 600;
+            padding: 10px 30px;
+            margin-top: 10px;
+        }
+
+        /* Menü Linkleri */
+        .nav-link {
+            color: #718096;
+            padding: 10px 30px;
+            font-size: 15px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s;
+            border-left: 4px solid transparent;
+        }
+
+            .nav-link i {
+                width: 20px;
+                font-size: 16px;
+                margin-right: 12px;
+                color: #cbd5e0;
+                transition: color 0.2s;
+            }
+
+            .nav-link:hover {
+                background-color: var(--hover-bg);
+                color: var(--primary-dark);
+            }
+
+                .nav-link:hover i {
+                    color: var(--primary-soft);
+                }
+
+            .nav-link.active {
+                background-color: #f0f4ff;
+                color: var(--primary-dark);
+                border-left-color: var(--primary-dark);
+            }
+
+        /* --- SAYAÇLAR (BADGES) --- */
+        .badge-soft {
+            background-color: #edf2f7;
+            color: #718096;
+            font-weight: 600;
+            font-size: 11px;
+            padding: 5px 10px;
+            border-radius: 8px;
+            margin-left: auto;
+        }
+
+            .badge-soft.active {
+                background-color: #ebf8ff;
+                color: #4299e1;
+            }
+
+        /* --- MAIN CONTENT --- */
+        .main-content {
+            margin-left: 260px;
+            width: calc(100% - 260px);
+            min-height: 100vh;
+            padding: 30px;
+        }
+
+        /* --- PASTELMAIL ÖZEL TOPBAR --- */
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: #ffffff;
+            padding: 15px 30px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(142, 148, 242, 0.05);
+            border: 1px solid rgba(142, 148, 242, 0.1);
+        }
+
+        /* --- PASTEL MOR BİLDİRİM ZİLİ --- */
+        .notification-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 16px;
+            background-color: rgba(142, 148, 242, 0.15);
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            border: none;
+            position: relative;
+        }
+
+            .notification-btn:hover, .notification-btn[aria-expanded="true"] {
+                background-color: rgba(142, 148, 242, 0.25);
+                transform: translateY(-3px);
+                box-shadow: 0 8px 15px rgba(142, 148, 242, 0.2);
+            }
+
+            .notification-btn.dropdown-toggle::after {
+                display: none;
+            }
+
+        .notification-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 18px;
+            height: 18px;
+            background-color: #ef4444;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- BİLDİRİM MENÜSÜ TASARIMI --- */
+        .notification-dropdown {
+            width: 320px;
+            padding: 0;
+            overflow: hidden;
+            border: none !important;
+            box-shadow: 0 15px 40px rgba(142, 148, 242, 0.12) !important;
+            border-radius: 24px !important;
+            margin-top: 15px !important;
+        }
+
+        .notification-header {
+            background-color: #f8fafc;
+            padding: 15px;
+            border-bottom: 1px solid #edf2f7;
+            font-weight: 700;
+            color: var(--text-dark);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notification-item {
+            padding: 15px;
+            border-bottom: 1px solid #edf2f7;
+            display: flex;
+            gap: 15px;
+            transition: background 0.2s;
+            text-decoration: none;
+            color: var(--text-dark);
+        }
+
+            .notification-item:hover {
+                background-color: rgba(142, 148, 242, 0.05);
+            }
+
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(142, 148, 242, 0.15);
+            color: var(--primary-dark);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .notification-text {
+            font-size: 13px;
+            line-height: 1.4;
+            overflow: hidden;
+        }
+
+        .notification-time {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            display: block;
+            font-weight: 500;
+        }
+
+        .notification-empty {
+            padding: 40px 20px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        /* --- KULLANICI BUTONU (Çizgisiz & Yumuşak) --- */
+        .user-profile-btn {
+            background: transparent;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 6px 15px 6px 6px;
+            border-radius: 30px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+            .user-profile-btn:focus,
+            .user-profile-btn:active,
+            .user-profile-btn:focus-visible {
+                outline: none !important;
+                box-shadow: none !important;
+                border: none !important;
+                background: rgba(142, 148, 242, 0.05);
+            }
+
+            .user-profile-btn:hover,
+            .user-profile-btn[aria-expanded="true"] {
+                background: rgba(142, 148, 242, 0.08);
+            }
+
+            .user-profile-btn.dropdown-toggle::after {
+                display: none;
+            }
+
+        /* --- KULLANICI DROPDOWN --- */
+        .dropdown-menu-pastel {
+            border: none !important;
+            box-shadow: 0 15px 40px rgba(142, 148, 242, 0.12) !important;
+            border-radius: 24px !important;
+            padding: 15px !important;
+            min-width: 210px;
+            margin-top: 15px !important;
+        }
+
+        .dropdown-item-pastel {
+            border-radius: 12px;
+            padding: 10px 15px;
+            font-weight: 500;
+            color: var(--text-dark);
+            transition: all 0.2s;
+            font-size: 14px;
+            margin-bottom: 2px;
+            border: none;
+        }
+
+            .dropdown-item-pastel:hover {
+                background-color: rgba(142, 148, 242, 0.08);
+                color: var(--primary-dark);
+                transform: translateX(5px);
+            }
+    </style>
+</head>
+<body>
+
+    @await Component.InvokeAsync("SidebarMessageCount")
+
+    <div class="main-content">
+
+        <div class="topbar">
+            <div>
+                <h4 class="fw-bold mb-1" style="color:var(--primary-dark)">@ViewData["Title"]</h4>
+                <small class="text-muted" style="font-weight: 500;">Hoş geldin, paneli buradan yönetebilirsin ✨</small>
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+
+                <div class="dropdown">
+                    <button class="notification-btn shadow-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
+                        <i class="fa-solid fa-bell fs-5"></i>
+                        @if (totalUnreadCount > 0)
+                        {
+                            <span class="notification-badge text-white" style="font-size: 10px; font-weight: bold;">
+                                @totalUnreadCount
+                            </span>
+                        }
+                    </button>
+
+                    <div class="dropdown-menu dropdown-menu-end dropdown-menu-pastel notification-dropdown shadow-lg p-0">
+                        <div class="notification-header">
+                            <span>Bildirimler</span>
+                            @if (totalUnreadCount > 0)
+                            {
+                                <span class="badge" style="background-color: var(--primary-soft);">@totalUnreadCount Yeni</span>
+                            }
+                        </div>
+
+                        <div>
+                            @if (totalUnreadCount > 0)
+                            {
+                                foreach (var msg in unreadMessages)
+                                {
+                                    <a href="/Message/Inbox" class="notification-item">
+                                        <div class="notification-icon">
+                                            <i class="fa-solid fa-envelope-open-text"></i>
+                                        </div>
+                                        <div class="notification-text">
+                                            <span class="fw-bold d-block text-truncate">@msg.SenderEmail</span>
+                                            <span class="text-muted d-block text-truncate">@msg.Subject</span>
+                                            <span class="notification-time">@msg.SendDate.ToString("dd MMM yyyy, HH:mm")</span>
+                                        </div>
+                                    </a>
+                                }
+                                <div class="text-center p-3 border-top" style="background: #f8fafc;">
+                                    <a href="/Message/Inbox" class="text-decoration-none" style="font-size: 13px; color: var(--primary-dark); font-weight: 700;">Tüm Mesajları Gör <i class="fa-solid fa-arrow-right ms-1"></i></a>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="notification-empty">
+                                    <div style="width: 60px; height: 60px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto;">
+                                        <i class="fa-regular fa-bell-slash" style="font-size: 24px; color: #a0aec0;"></i>
+                                    </div>
+                                    <span class="d-block" style="font-size: 15px; font-weight: 600; color: var(--text-dark);">Okunmamış mesaj yok.</span>
+                                    <span class="d-block mt-1" style="font-size: 13px;">Gelen kutunuz tertemiz! ✨</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dropdown ms-2">
+                    <button class="user-profile-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="@userImage" width="45" height="45" class="rounded-circle" style="object-fit:cover; border: 3px solid #e0e7ff; padding: 2px; background: white;">
+                        <div class="text-start d-none d-md-block" style="line-height:1.2;">
+                            <span class="d-block fw-bold" style="font-size:14px; color:var(--text-dark)">@fullName</span>
+                            <span class="d-block" style="font-size:12px; color:var(--primary-soft); font-weight:600;">Yönetici</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-down ms-2" style="font-size:12px; color:var(--primary-soft);"></i>
+                    </button>
+
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-pastel">
+                        <li>
+                            <a class="dropdown-item dropdown-item-pastel" href="/Profile/UserProfile">
+                                <i class="fa-solid fa-user-astronaut me-2" style="color: var(--primary-soft); width: 20px; text-align: center;"></i> Profilim
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item dropdown-item-pastel" href="/Dashboard/Index">
+                                <i class="fa-solid fa-chart-pie me-2" style="color: #f6ad55; width: 20px; text-align: center;"></i> İstatistikler
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider" style="border-color:#f1f5f9; margin: 10px 0;"></li>
+                        <li>
+                            <a class="dropdown-item dropdown-item-pastel text-danger" href="/Login/UserLogin">
+                                <i class="fa-solid fa-power-off me-2" style="width: 20px; text-align: center;"></i> Çıkış Yap
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+
+        @RenderBody()
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

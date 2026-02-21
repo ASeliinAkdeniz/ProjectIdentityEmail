@@ -1,0 +1,408 @@
+﻿@model ProjectIdentityEmail.Entities.AppUser
+@{
+    ViewData["Title"] = "Profilim";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --primary-soft: #8e94f2;
+        --primary-dark: #6c72e2;
+        --text-dark: #2d3748;
+        --text-muted: #a0aec0;
+        --bg-card: #ffffff;
+        --bg-body: #f3f4f8;
+    }
+
+    /* KART TASARIMI */
+    .profile-card {
+        background-color: var(--bg-card);
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+        padding: 30px;
+        margin-bottom: 20px;
+        transition: transform 0.2s;
+    }
+
+    /* PROFİL FOTOĞRAFI */
+    .profile-img-container {
+        position: relative;
+        width: 140px;
+        height: 140px;
+        margin: 0 auto 20px auto;
+    }
+
+    .profile-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 4px solid white;
+        box-shadow: 0 8px 25px rgba(142, 148, 242, 0.25);
+    }
+
+    /* METİN STİLLERİ */
+    .user-name {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        color: var(--text-dark);
+        font-size: 1.5rem;
+        margin-bottom: 5px;
+    }
+
+    .user-role {
+        font-size: 0.9rem;
+        color: var(--primary-soft);
+        font-weight: 600;
+        background: rgba(142, 148, 242, 0.1);
+        padding: 5px 15px;
+        border-radius: 20px;
+        display: inline-block;
+        margin-bottom: 15px;
+    }
+
+    .stat-box {
+        text-align: center;
+        padding: 15px;
+        border-radius: 15px;
+        background: #f8fafc;
+        transition: 0.2s;
+    }
+
+        .stat-box:hover {
+            background: #edf2f7;
+        }
+
+    .stat-number {
+        font-weight: 800;
+        font-size: 1.2rem;
+        color: var(--text-dark);
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* İLETİŞİM BİLGİLERİ */
+    .contact-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        padding: 12px;
+        border-radius: 12px;
+        /* background: #fcfcfc;  İsteğe bağlı */
+    }
+
+    .contact-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(142, 148, 242, 0.1);
+        color: var(--primary-soft);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        font-size: 18px;
+    }
+
+    /* TABS (SEKMELER) */
+    .nav-tabs {
+        border-bottom: 2px solid #f1f5f9;
+    }
+
+    .nav-link {
+        border: none;
+        color: var(--text-muted);
+        font-weight: 600;
+        padding: 15px 25px;
+        font-size: 14px;
+        background: transparent !important;
+    }
+
+        .nav-link.active {
+            color: var(--primary-dark) !important;
+            border-bottom: 3px solid var(--primary-dark) !important;
+        }
+
+    /* PROGRESS BAR */
+    .progress {
+        height: 8px;
+        border-radius: 10px;
+        background-color: #f1f5f9;
+    }
+
+    .progress-bar {
+        background-color: var(--primary-soft);
+        border-radius: 10px;
+    }
+
+    /* EDUCATION LIST */
+    .edu-item {
+        border-left: 3px solid var(--primary-soft);
+        padding-left: 20px;
+        margin-bottom: 25px;
+        position: relative;
+    }
+
+        .edu-item::before {
+            content: "";
+            width: 12px;
+            height: 12px;
+            background: white;
+            border: 3px solid var(--primary-soft);
+            border-radius: 50%;
+            position: absolute;
+            left: -7.5px;
+            top: 5px;
+        }
+
+    /* MODAL */
+    .modal-content {
+        border-radius: 20px;
+        border: none;
+    }
+
+    .modal-header {
+        border-bottom: 1px solid #f1f5f9;
+        padding: 20px 30px;
+    }
+
+    .modal-footer {
+        border-top: 1px solid #f1f5f9;
+        padding: 20px 30px;
+    }
+
+    .form-control-soft {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 10px 15px;
+    }
+
+        .form-control-soft:focus {
+            background-color: #fff;
+            border-color: var(--primary-soft);
+            box-shadow: 0 0 0 3px rgba(142, 148, 242, 0.1);
+        }
+</style>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-4 col-md-5">
+            <div class="profile-card text-center">
+                <div class="profile-img-container">
+                    <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "/images/default-user.png" : "/images/" + Model.ImageUrl)" class="profile-img">
+                </div>
+
+                <h4 class="user-name">@Model.Name @Model.SurName</h4>
+                <span class="user-role">@Model.UserName</span>
+
+                <div class="row mt-4 px-2">
+                    <div class="col-6">
+                        <div class="stat-box">
+                            <div class="stat-number">@Model.Skills?.Count()</div>
+                            <div class="stat-label">Yetenek</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-box">
+                            <div class="stat-number">@Model.Educations?.Count()</div>
+                            <div class="stat-label">Eğitim</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-start mt-4 pt-4 border-top" style="border-color:#f1f5f9 !important;">
+                    <div class="contact-item">
+                        <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+                        <div>
+                            <small class="d-block text-muted fw-bold" style="font-size:11px;">E-MAIL</small>
+                            <span class="text-dark fw-medium">@Model.Email</span>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon"><i class="fas fa-phone"></i></div>
+                        <div>
+                            <small class="d-block text-muted fw-bold" style="font-size:11px;">TELEFON</small>
+                            <span class="text-dark fw-medium">@Model.PhoneNumber</span>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+                        <div>
+                            <small class="d-block text-muted fw-bold" style="font-size:11px;">KONUM</small>
+                            <span class="text-dark fw-medium">Türkiye</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8 col-md-7">
+            <div class="profile-card" style="min-height: 580px;">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-4" style="border-color:#f1f5f9 !important;">
+                    <ul class="nav nav-tabs border-0" role="tablist">
+                        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#profile">Profil</a></li>
+                    </ul>
+                    <button class="btn btn-sm text-white px-3 py-2 rounded-3 shadow-sm"
+                            style="background-color: var(--primary-soft); border:none;"
+                            data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                        <i class="fas fa-pen me-2"></i> Düzenle
+                    </button>
+                </div>
+
+                <div class="tab-content">
+                    <div class="tab-pane active" id="profile">
+
+                        <div class="mb-5">
+                            <h6 class="fw-bold text-dark mb-3"><i class="fas fa-user-circle me-2 text-muted"></i> Hakkımda</h6>
+                            <p class="text-muted" style="line-height: 1.7;">
+                                @(Model.About ?? "Henüz bir biyografi eklenmemiş.")
+                            </p>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <h6 class="fw-bold text-dark mb-4"><i class="fas fa-tools me-2 text-muted"></i> Yetenekler</h6>
+                                @if (Model.Skills != null)
+                                {
+                                    foreach (var skill in Model.Skills)
+                                    {
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span class="fw-bold small text-dark">@skill.Title.ToUpper()</span>
+                                                <span class="fw-bold small text-primary">@skill.Value%</span>
+                                            </div>
+                                            <div class="progress"><div class="progress-bar" style="width:@skill.Value%;"></div></div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+
+                            <div class="col-md-6">
+                                <h6 class="fw-bold text-dark mb-4"><i class="fas fa-graduation-cap me-2 text-muted"></i> Eğitim Geçmişi</h6>
+                                @if (Model.Educations != null)
+                                {
+                                    foreach (var edu in Model.Educations)
+                                    {
+                                        <div class="edu-item">
+                                            <h6 class="fw-bold text-dark mb-1">@edu.SchoolName</h6>
+                                            <span class="d-block text-primary small fw-bold mb-1">@edu.Department</span>
+                                            <span class="d-block text-muted small"><i class="far fa-calendar-alt me-1"></i> @edu.StartDate - @edu.EndDate</span>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <form asp-action="UpdateAllProfile" method="post" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Profili Düzenle</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">İSİM</label>
+                            <input type="text" name="Name" value="@Model.Name" class="form-control form-control-soft">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">SOYİSİM</label>
+                            <input type="text" name="SurName" value="@Model.SurName" class="form-control form-control-soft">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">TELEFON</label>
+                            <input type="text" name="PhoneNumber" value="@Model.PhoneNumber" class="form-control form-control-soft">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">FOTOĞRAF</label>
+                            <input type="file" name="Image" class="form-control form-control-soft">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-muted">HAKKIMDA</label>
+                            <textarea name="About" rows="3" class="form-control form-control-soft">@Model.About</textarea>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 border-end pe-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <label class="small fw-bold text-dark">YETENEKLER</label>
+                                <button type="button" class="btn btn-sm btn-light text-primary fw-bold" onclick="addSkillRow()">+ Ekle</button>
+                            </div>
+                            <div id="skillsContainer">
+                                @if (Model.Skills != null)
+                                {
+                                    for (int i = 0; i < Model.Skills.Count; i++)
+                                    {
+                                        <div class="d-flex gap-2 mb-2 skill-row">
+                                            <input type="hidden" name="Skills[@i].Id" value="@Model.Skills[i].Id" />
+                                            <input type="text" name="Skills[@i].Title" value="@Model.Skills[i].Title" class="form-control form-control-sm form-control-soft">
+                                            <input type="number" name="Skills[@i].Value" value="@Model.Skills[i].Value" min="0" max="100" class="form-control form-control-sm form-control-soft" style="width: 70px;">
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 ps-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <label class="small fw-bold text-dark">EĞİTİM</label>
+                                <button type="button" class="btn btn-sm btn-light text-primary fw-bold" onclick="addEduRow()">+ Ekle</button>
+                            </div>
+                            <div id="eduContainer">
+                                @if (Model.Educations != null)
+                                {
+                                    for (int i = 0; i < Model.Educations.Count; i++)
+                                    {
+                                        <div class="mb-3 p-2 bg-light rounded-3 edu-row border border-light">
+                                            <input type="hidden" name="Educations[@i].Id" value="@Model.Educations[i].Id" />
+                                            <input type="text" name="Educations[@i].SchoolName" value="@Model.Educations[i].SchoolName" class="form-control form-control-sm border-0 bg-transparent fw-bold mb-1" placeholder="Okul">
+                                            <input type="text" name="Educations[@i].Department" value="@Model.Educations[i].Department" class="form-control form-control-sm border-0 bg-transparent mb-2" placeholder="Bölüm">
+                                            <div class="d-flex gap-2">
+                                                <input type="text" name="Educations[@i].StartDate" value="@Model.Educations[i].StartDate" class="form-control form-control-sm bg-white border" placeholder="Başlangıç">
+                                                <input type="text" name="Educations[@i].EndDate" value="@Model.Educations[i].EndDate" class="form-control form-control-sm bg-white border" placeholder="Bitiş">
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn text-white fw-bold shadow-sm" style="background-color: var(--primary-soft);">Değişiklikleri Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function addSkillRow() {
+        var count = document.getElementsByClassName('skill-row').length;
+        var html = `<div class="d-flex gap-2 mb-2 skill-row"><input type="text" name="Skills[${count}].Title" class="form-control form-control-sm form-control-soft" placeholder="Yetenek"><input type="number" name="Skills[${count}].Value" min="0" max="100" class="form-control form-control-sm form-control-soft" style="width: 70px;" placeholder="%"></div>`;
+        document.getElementById('skillsContainer').insertAdjacentHTML('beforeend', html);
+    }
+    function addEduRow() {
+        var count = document.getElementsByClassName('edu-row').length;
+        var html = `<div class="mb-3 p-2 bg-light rounded-3 edu-row border border-light"><input type="text" name="Educations[${count}].SchoolName" class="form-control form-control-sm border-0 bg-transparent fw-bold mb-1" placeholder="Okul Adı"><input type="text" name="Educations[${count}].Department" class="form-control form-control-sm border-0 bg-transparent mb-2" placeholder="Bölüm"><div class="d-flex gap-2"><input type="text" name="Educations[${count}].StartDate" class="form-control form-control-sm bg-white border" placeholder="Başlangıç"><input type="text" name="Educations[${count}].EndDate" class="form-control form-control-sm bg-white border" placeholder="Bitiş"></div></div>`;
+        document.getElementById('eduContainer').insertAdjacentHTML('beforeend', html);
+    }
+</script>

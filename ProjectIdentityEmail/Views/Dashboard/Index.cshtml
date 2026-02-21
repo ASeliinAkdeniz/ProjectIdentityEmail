@@ -1,0 +1,261 @@
+﻿@model DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* PASTEL KARTLAR */
+    .stat-card {
+        border: none;
+        border-radius: 20px;
+        padding: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: transform 0.3s ease;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        height: 100%;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+    /* Renk Temaları */
+    .card-purple {
+        background-color: #e0e7ff;
+        color: #4338ca;
+    }
+    /* Okunmamış */
+    .card-yellow {
+        background-color: #fef3c7;
+        color: #d97706;
+    }
+    /* Yıldızlı */
+    .card-green {
+        background-color: #d1fae5;
+        color: #059669;
+    }
+    /* Giden */
+    .card-pink {
+        background-color: #fce7f3;
+        color: #db2777;
+    }
+    /* Toplam */
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+
+    .stat-number {
+        font-size: 32px;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 5px;
+    }
+
+    .stat-label {
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        opacity: 0.8;
+    }
+
+    /* GRAFİK VE LİSTE KARTLARI */
+    .dashboard-box {
+        background: #fff;
+        border-radius: 20px;
+        padding: 30px;
+        border: 1px solid #f1f5f9;
+        height: 100%;
+    }
+
+    .box-title {
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 20px;
+        display: block;
+    }
+</style>
+
+<div class="container-fluid">
+
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card card-purple">
+                <div>
+                    <div class="stat-number">@Model.UnreadCount</div>
+                    <div class="stat-label">Okunmamış Mail</div>
+                </div>
+                <div class="stat-icon"><i class="fas fa-envelope-open-text"></i></div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card card-yellow">
+                <div>
+                    <div class="stat-number">@Model.StarredCount</div>
+                    <div class="stat-label">Yıldızlı Mail</div>
+                </div>
+                <div class="stat-icon"><i class="fas fa-star"></i></div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card card-green">
+                <div>
+                    <div class="stat-number">@Model.SentCount</div>
+                    <div class="stat-label">Giden Kutusu</div>
+                </div>
+                <div class="stat-icon"><i class="fas fa-paper-plane"></i></div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card card-pink">
+                <div>
+                    <div class="stat-number">@Model.TotalIncomingCount</div>
+                    <div class="stat-label">Toplam Gelen</div>
+                </div>
+                <div class="stat-icon"><i class="fas fa-inbox"></i></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-lg-4">
+            <div class="dashboard-box">
+                <span class="box-title">Kategori Dağılımı</span>
+                <canvas id="categoryChart" style="max-height: 300px;"></canvas>
+                <div class="text-center mt-3 small text-muted">
+                    Maillerin konularına göre dağılım grafiği.
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="dashboard-box">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="box-title mb-0">Son Gelen Mailler</span>
+                    <a href="/Message/Inbox" class="btn btn-sm btn-light text-primary fw-bold rounded-pill">Tümünü Gör</a>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-borderless align-middle">
+                        <thead class="text-muted small border-bottom">
+                            <tr>
+                                <th>GÖNDEREN</th>
+                                <th>KONU</th>
+                                <th>TARİH</th>
+                                <th class="text-end">DURUM</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.LastFiveMessages.Any())
+                            {
+                                foreach (var item in Model.LastFiveMessages)
+                                {
+                                    <tr class="border-bottom" style="border-color:#f8fafc;">
+                                        <td class="py-3">
+                                            <div class="d-flex align-items-center">
+                                                <div style="width:35px; height:35px; background:#f3f4f6; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#6b7280; font-weight:bold; margin-right:10px;">
+                                                    @item.SenderEmail.Substring(0, 1).ToUpper()
+                                                </div>
+                                                <span class="fw-bold text-dark small">@item.SenderEmail</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-muted small">@item.Subject</td>
+                                        <td class="text-muted small">@item.SendDate.ToString("dd MMM HH:mm")</td>
+                                        <td class="text-end">
+                                            @if (item.IsStatus)
+                                            {
+                                                <span class="badge bg-light text-muted border">Okundu</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge" style="background:#e0e7ff; color:#4338ca;">Yeni</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-4">Henüz mesaj yok.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<canvas id="categoryChart" style="max-height: 300px;"></canvas>
+
+<script>
+    // Sayfanın HTML'i tamamen yüklendikten sonra grafiği çiz
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // Razor'dan gelen verileri önce güvenli JS değişkenlerine alalım
+        var workCount = @Model.WorkCount;
+        var familyCount = @Model.FamilyCount;
+        var friendsCount = @Model.FriendsCount;
+        var totalIncoming = @Model.TotalIncomingCount;
+
+        // Negatif sayı çıkmasını engellemek için Math.max kullanıyoruz (Sonuç eksi çıkarsa 0 yazar)
+        var otherCount = Math.max(0, totalIncoming - (workCount + familyCount + friendsCount));
+
+        var canvasElement = document.getElementById('categoryChart');
+
+        // Eğer canvas sayfada yoksa hata vermesini engelle
+        if (canvasElement) {
+            var ctx = canvasElement.getContext('2d');
+
+            var myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['İş', 'Aile', 'Arkadaşlar', 'Diğer'],
+                    datasets: [{
+                        data: [workCount, familyCount, friendsCount, otherCount],
+                        backgroundColor: [
+                            '#8e94f2', // Mor (İş)
+                            '#f6ad55', // Turuncu (Aile)
+                            '#68d391', // Yeşil (Arkadaşlar)
+                            '#cbd5e0'  // Gri (Diğer)
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                font: { size: 12 }
+                            }
+                        }
+                    },
+                    cutout: '70%',
+                }
+            });
+        }
+    });
+</script>

@@ -1,0 +1,199 @@
+﻿@model List<ProjectIdentityEmail.Entities.Message>
+@{
+    ViewData["Title"] = ViewBag.FolderTitle;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* Senin Pastel Tema Ayarların */
+    :root {
+        --text-dark: #2d3748;
+        --text-muted: #a0aec0;
+        --bg-card: #ffffff;
+        --bg-body: #f3f4f8;
+        --border-color: #f1f5f9;
+        --hover-row: #f8fafc;
+        --gold-star: #fbbf24;
+    }
+
+    .folder-card {
+        background-color: var(--bg-card);
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+        padding: 0;
+        overflow: hidden;
+        min-height: 80vh;
+    }
+
+    .table-responsive {
+        width: 100%;
+        border-radius: 20px;
+    }
+
+    .table-custom {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 0;
+    }
+
+        .table-custom thead th {
+            background-color: #f8fafc;
+            color: var(--text-muted);
+            font-weight: 700;
+            padding: 20px 25px;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--border-color);
+            border-top: none;
+        }
+
+        .table-custom tbody tr {
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.2s ease-in-out;
+        }
+
+            .table-custom tbody tr:hover {
+                background-color: var(--hover-row);
+            }
+
+            .table-custom tbody tr td {
+                padding: 18px 25px;
+                vertical-align: middle;
+                border: none;
+                color: var(--text-dark);
+            }
+
+    .subject-title {
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--text-dark);
+        display: block;
+    }
+
+    .message-preview {
+        font-size: 0.85rem;
+        color: #a0aec0;
+        display: block;
+        margin-top: 4px;
+    }
+
+    .folder-icon-box {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        margin: 0 auto;
+    }
+
+    /* Seninkiyle aynı işlem butonları */
+    .btn-action {
+        width: 35px;
+        height: 35px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #e2e8f0;
+        color: #a0aec0;
+        background: white;
+        transition: 0.2s;
+    }
+
+        .btn-action:hover {
+            background: #8e94f2;
+            color: white;
+            border-color: #8e94f2;
+        }
+</style>
+
+<div class="container-fluid p-0">
+    <div class="folder-card">
+
+        <div class="d-flex justify-content-between align-items-center p-4 border-bottom" style="border-color: var(--border-color) !important;">
+            <div class="d-flex align-items-center">
+                <div style="background-color: @ViewBag.FolderBgHex; padding: 12px; border-radius: 12px; margin-right: 15px; color:@ViewBag.FolderTextHex;">
+                    <i class="fas @ViewBag.FolderIcon fa-lg"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold mb-0" style="color:var(--text-dark);">@ViewBag.FolderTitle</h4>
+                    <small class="text-muted">Bu kategoriye eklediğiniz mesajlar</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            @if (Model.Count > 0)
+            {
+                <div class="table-responsive">
+                    <table class="table table-custom">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;" class="text-center"><i class="fas @ViewBag.FolderIcon @ViewBag.FolderColorClass"></i></th>
+                                <th style="width: 45%;">KONU VE İÇERİK</th>
+                                <th style="width: 25%;">KİŞİ</th>
+                                <th>TARİH</th>
+                                <th class="text-end pe-5">İŞLEMLER</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                string plainText = System.Text.RegularExpressions.Regex.Replace(item.MessageDetail ?? "", "<.*?>", String.Empty);
+                                string previewText = plainText.Length > 60 ? plainText.Substring(0, 60) + "..." : plainText;
+                                bool isIncoming = item.ReceiverEmail == User.Identity.Name;
+                                string personInfo = isIncoming ? item.SenderEmail : item.ReceiverEmail;
+
+                                <tr>
+                                    <td class="text-center">
+                                        <div class="folder-icon-box" style="background-color: @ViewBag.FolderBgHex; color:@ViewBag.FolderTextHex;">
+                                            <i class="fas @ViewBag.FolderIcon"></i>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <span class="subject-title">
+                                                @if (isIncoming)
+                                                {
+                                                    <i class="fas fa-arrow-down text-success me-1" title="Gelen"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="fas fa-arrow-up text-primary me-1" title="Giden"></i>
+                                                }
+                                                @item.Subject
+                                            </span>
+                                            <span class="message-preview">@previewText</span>
+                                        </div>
+                                    </td>
+                                    <td style="font-weight: 600; color: var(--text-dark);">@personInfo</td>
+                                    <td style="color: #a0aec0; font-size: 0.85rem; font-weight:500;">@item.SendDate.ToString("dd MMM yyyy, HH:mm")</td>
+                                    <td class="text-end pe-5">
+                                        <a href="/Message/AssignFolder?id=@item.MessageId&folder=" class="btn-action text-decoration-none" title="Klasörden Çıkar">
+                                            <i class="fas fa-folder-minus"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5 mt-5">
+                    <div style="background:@ViewBag.FolderBgHex; width:100px; height:100px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin: 0 auto 20px auto;">
+                        <i class="fas @ViewBag.FolderIcon fa-3x" style="color:@ViewBag.FolderTextHex; opacity:0.5;"></i>
+                    </div>
+                    <h5 class="fw-bold" style="color:var(--text-dark)">Klasör boş.</h5>
+                    <p class="text-muted">Bu kategoriye henüz bir mesaj eklemediniz.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
